@@ -1,0 +1,86 @@
+--- a/guppy/heapy/test/test_Part.py
++++ b/guppy/heapy/test/test_Part.py
+@@ -88,16 +88,24 @@
+ 
+ class MixedCase(support.TestCase):
+     def test_1(self):
++        import sys
+ 	x = self.iso(1, 2, 1.0, 2.0, '1', '2')
+ 	if self.allocation_behaves_as_originally:
+-	    self.aseq(str(x), """\
++            if sys.version < '2.7':
++                self.aseq(str(x), """\
+ Partition of a set of 6 objects. Total size = 112 bytes.
+  Index  Count   %     Size   % Cumulative  % Kind (class / dict of class)
+      0      2  33       56  50        56  50 str
+      1      2  33       32  29        88  79 float
+      2      2  33       24  21       112 100 int""")
+-
+-
++            else:
++                self.aseq(str(x), """\
++Partition of a set of 6 objects. Total size = 104 bytes.
++ Index  Count   %     Size   % Cumulative  % Kind (class / dict of class)
++     0      2  33       48  46        48  46 str
++     1      2  33       32  31        80  77 float
++     2      2  33       24  23       104 100 int""")
++                
+ 	for row in x.partition.get_rows():
+ 	    self.assert_(row.set <= row.kind)
+ 	 
+--- a/guppy/sets/test.py
++++ b/guppy/sets/test.py
+@@ -892,7 +892,7 @@
+ 	    except OverflowError:
+ 		pass
+ 	    else:
+-		raise 'expected ValueError'
++		raise 'expected OverflowError'
+ 
+ 	tsv(bitset([maxint]), 1)
+ 	tsv(bitset([minint]), -1)
+--- a/src/sets/bitset.c
++++ b/src/sets/bitset.c
+@@ -2017,7 +2017,11 @@
+     int cpl = 0;
+     PyObject *w = 0;
+     
+-    x = _PyLong_AsScaledDouble(v, &e);
++#if PY_VERSION_HEX >= 0x02070000
++	x = _PyLong_Frexp(v, &e);
++#else
++	x = _PyLong_AsScaledDouble(v, &e);
++#endif
+     if (x == -1 && PyErr_Occurred())
+       return -1;
+     if (x < 0) {
+@@ -2026,15 +2030,24 @@
+ 	w = PyNumber_Invert(v);
+ 	if (!w) return -1;
+ 	v = w;
++#if PY_VERSION_HEX >= 0x02070000
++	x = _PyLong_Frexp(v, &e);
++#else
+ 	x = _PyLong_AsScaledDouble(v, &e);
++#endif
+ 	if (x == -1 && PyErr_Occurred())
+ 	  return -1;
+ 	assert(x >= 0);
+     }
+-    if (x != 0)
+-      num_bits = 1.0 * e * SHIFT + log(x)/log(2) + 1;
++    if (x != 0) {
++	num_bits = e;
++#if PY_VERSION_HEX < 0x02070000
++	num_bits *= SHIFT;
++#endif
++	num_bits += log(x)/log(2) + 1;
++    }
+     else
+-      num_bits = 0;
++	num_bits = 0;
+ 	
+     num_poses = (long)(num_bits / NyBits_N + 1);
+     /* fprintf(stderr, "x %f e %d num_bits %f num_poses %ld\n", x, e, num_bits, num_poses); */
+
+
