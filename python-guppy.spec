@@ -1,12 +1,13 @@
 #
 # TODO:
 #	- Assetrion error at "guppy/heapy/Part.py", line 705, in __init__
+#	  when used interactively
 #
 %define 	module	guppy
 Summary:	Guppy - A Python Programming Environment
 Name:		python-%{module}
 Version:	0.1.9
-Release:	0.1
+Release:	1
 License:	MIT
 Group:		Development/Languages/Python
 Source0:	http://pypi.python.org/packages/source/g/guppy/%{module}-%{version}.tar.gz
@@ -21,13 +22,14 @@ Requires:	python-modules
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-Guppy-PE is a programming environment providing object and heap memory sizing,
-profiling and analysis. It includes a prototypical specification language that
-can be used to formally specify aspects of Python programs and generate tests
-and documentation from a common source. 
+Guppy-PE is a programming environment providing object and heap memory
+sizing, profiling and analysis. It includes a prototypical
+specification language that can be used to formally specify aspects of
+Python programs and generate tests and documentation from a common
+source.
 
-Guppy is an umbrella package combining Heapy and GSL with support utilities
-such as the Glue module that keeps things together. 
+Guppy is an umbrella package combining Heapy and GSL with support
+utilities such as the Glue module that keeps things together.
 
 %prep
 %setup -q -n %{module}-%{version}
@@ -60,7 +62,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{py_sitedir}/%{module}/doc
 %{py_sitedir}/%{module}/doc/*.html
 %{py_sitedir}/%{module}/doc/*.jpg
-%dir %{py_sitedir}/%{module}/etc
+%dir %{py_sitedir}/%{module}%{_sysconfdir}
 %dir %{py_sitedir}/%{module}/gsl
 %dir %{py_sitedir}/%{module}/heapy
 %dir %{py_sitedir}/%{module}/heapy/test
