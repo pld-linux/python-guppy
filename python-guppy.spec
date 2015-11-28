@@ -7,7 +7,7 @@
 Summary:	Guppy - A Python Programming Environment
 Name:		python-%{module}
 Version:	0.1.9
-Release:	1
+Release:	2
 License:	MIT
 Group:		Development/Languages/Python
 Source0:	http://pypi.python.org/packages/source/g/guppy/%{module}-%{version}.tar.gz
